@@ -1,20 +1,32 @@
-package com.example.dexter0218.zhihutest;
+package com.dexter0218.zhihu.ui.activity;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.PowerManager;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
 
 import hugo.weaving.DebugLog;
 
 public class BaseActivity extends AppCompatActivity {
+    private Toolbar mToolBar;
+    private CoordinatorLayout mCoordinatorLayout;
     protected int layoutResID = R.layout.activity_base;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(layoutResID);
+
+        mToolBar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolBar);
+        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+
         if (BuildConfig.DEBUG) {
             // do something you only want to do in debug builds (logging, ...)
             riseAndShine(this);
@@ -37,5 +49,9 @@ public class BaseActivity extends AppCompatActivity {
 
         lock.acquire();
         lock.release();
+    }
+
+    public void showSnackbar(int resId) {
+        Snackbar.make(mCoordinatorLayout, resId, Snackbar.LENGTH_SHORT).show();
     }
 }
