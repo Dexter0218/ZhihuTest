@@ -1,4 +1,4 @@
-package com.dexter0218.zhihu.ui.com.dexter0218.zhihu.bean;
+package com.dexter0218.zhihu.bean;
 
 import java.util.List;
 
