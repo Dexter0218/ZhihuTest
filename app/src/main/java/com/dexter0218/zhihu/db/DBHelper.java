@@ -16,8 +16,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "daily_nes.db";
     public static final int DATABASE_VERSION = 1;
 
-    private static final String DATABASE_CREATE = "CREATE TABLE" + TABLE_NAME
-            + "{" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+    private static final String DATABASE_CREATE = "CREATE TABLE " + TABLE_NAME
+            + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_DATE + " CHAR(8) UNIQUE, "
             + COLUMN_CONTENT + " TEXT NOT NULL);";
 

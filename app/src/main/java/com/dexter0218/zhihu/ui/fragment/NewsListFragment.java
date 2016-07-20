@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dexter0218.zhihu.ZhihuDailyApplication;
+import com.dexter0218.zhihu.adapter.NewsAdapter;
 import com.dexter0218.zhihu.observable.NewsListFromDatabaseObservable;
 import com.dexter0218.zhihu.support.Constants;
 import com.dexter0218.zhihu.ui.activity.R;
@@ -18,6 +20,7 @@ import com.dexter0218.zhihu.bean.DailyNews;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -28,7 +31,12 @@ import rx.schedulers.Schedulers;
 public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, Observer {
     private List<DailyNews> newsList = new ArrayList<>();
     private String date;
+    private NewsAdapter mAdapter;
+
     private boolean isToday;
+    private boolean isRefreshed = false;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,12 +58,16 @@ public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnR
         assert view != null;
         RecyclerView mRecycleView = (RecyclerView) view.findViewById(R.id.news_list);
         mRecycleView.setHasFixedSize(!isToday);
-        LinearLayoutManager llm=new LinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mRecycleView.setLayoutManager(llm);
 
+        mAdapter = new NewsAdapter(newsList);
+        mRecycleView.setAdapter(mAdapter);
 
-
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swip_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.color_primary);
         return view;
     }
 
@@ -72,8 +84,59 @@ public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     @Override
-    public void onCompleted() {
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
 
+        refreshIf(shouldRefreshOnVisibilityChange(isVisibleToUser));
+    }
+
+    private void refreshIf(boolean prerequisite) {
+        if (prerequisite) {
+//            doRefresh();
+        }
+    }
+
+    private void doRefresh() {
+        getNewsListObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this);
+
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setRefreshing(true);
+        }
+    }
+
+    private Observable<List<DailyNews>> getNewsListObservable() {
+        if (shouldSubScribeToZhihu()) {
+//            return NewsListFromZhihuObservable.ofDate(date);
+        } else {
+//            return NewsListFromAccelerateServerObservable.ofDate(date);
+        }
+        return null;
+    }
+
+    private boolean shouldSubScribeToZhihu() {
+        return isToday || !shouldUseAccerlerateServer();
+    }
+
+    private boolean shouldUseAccerlerateServer() {
+
+        return ZhihuDailyApplication.getSharedPreferences().getBoolean(Constants.SharedPreferencesKeys.KEY_SHOULD_USE_ACCELERATE_SERVER, false);
+    }
+
+    private boolean shouldAutoRefresh() {
+        return ZhihuDailyApplication.getSharedPreferences()
+                .getBoolean(Constants.SharedPreferencesKeys.KEY_SHOULD_AUTO_REFRESH, true);
+    }
+
+    private boolean shouldRefreshOnVisibilityChange(boolean isVisibleToUser) {
+        return isVisibleToUser && shouldAutoRefresh() && !isRefreshed;
+    }
+
+    @Override
+    public void onCompleted() {
+        isRefreshed = true;
     }
 
     @Override

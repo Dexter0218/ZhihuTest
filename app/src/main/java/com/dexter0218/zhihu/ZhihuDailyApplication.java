@@ -2,7 +2,10 @@ package com.dexter0218.zhihu;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
+import com.dexter0218.zhihu.db.DailyNewsDataSource;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -15,7 +18,9 @@ public final class ZhihuDailyApplication extends Application {
 
 
     private static ZhihuDailyApplication applicationContext;
-//    private static DailynewsDataSource dataSource;
+
+
+    private static DailyNewsDataSource dataSource;
 
     public static void initImageLoader(Context context) {
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
@@ -27,6 +32,9 @@ public final class ZhihuDailyApplication extends Application {
         ImageLoader.getInstance().init(config);
     }
 
+    public static DailyNewsDataSource getDataSource() {
+        return dataSource;
+    }
 
     public static ZhihuDailyApplication getInstance() {
         return applicationContext;
@@ -35,8 +43,14 @@ public final class ZhihuDailyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        applicationContext =this;
+        applicationContext = this;
         initImageLoader(getApplicationContext());
+        dataSource = new DailyNewsDataSource(getApplicationContext());
+        dataSource.open();
 
+    }
+
+    public static SharedPreferences getSharedPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(applicationContext);
     }
 }
