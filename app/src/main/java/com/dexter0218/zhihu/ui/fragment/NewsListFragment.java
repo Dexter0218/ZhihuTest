@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dexter0218.zhihu.observable.NewsListFromDatabaseObservable;
 import com.dexter0218.zhihu.support.Constants;
 import com.dexter0218.zhihu.ui.activity.R;
 import com.dexter0218.zhihu.bean.DailyNews;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Dexter0218 on 2016/7/19.
@@ -54,6 +57,18 @@ public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnR
 
 
         return view;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        NewsListFromDatabaseObservable.ofDate(date)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this);
+
     }
 
     @Override
