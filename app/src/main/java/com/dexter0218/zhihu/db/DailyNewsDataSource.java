@@ -12,6 +12,8 @@ import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Created by Dexter0218 on 2016/7/20.
  */
@@ -64,6 +66,7 @@ public final class DailyNewsDataSource {
     }
 
     // That reminds you of Queen, huh? ;-)
+    @DebugLog
     public List<DailyNews> newsOfTheDay(String date) {
         Cursor cursor = database.query(DBHelper.TABLE_NAME,
                 allColumns, DBHelper.COLUMN_DATE + " = " + date, null, null, null, null);

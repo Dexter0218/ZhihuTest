@@ -13,13 +13,17 @@ import android.view.ViewGroup;
 import com.dexter0218.zhihu.ZhihuDailyApplication;
 import com.dexter0218.zhihu.adapter.NewsAdapter;
 import com.dexter0218.zhihu.observable.NewsListFromDatabaseObservable;
+import com.dexter0218.zhihu.observable.NewsListFromZhihuObservable;
 import com.dexter0218.zhihu.support.Constants;
+import com.dexter0218.zhihu.task.SaveNewsListTask;
+import com.dexter0218.zhihu.ui.activity.BaseActivity;
 import com.dexter0218.zhihu.ui.activity.R;
 import com.dexter0218.zhihu.bean.DailyNews;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
@@ -28,7 +32,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by Dexter0218 on 2016/7/19.
  */
-public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, Observer {
+public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, Observer<List<DailyNews>> {
     private List<DailyNews> newsList = new ArrayList<>();
     private String date;
     private NewsAdapter mAdapter;
@@ -92,7 +96,7 @@ public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     private void refreshIf(boolean prerequisite) {
         if (prerequisite) {
-//            doRefresh();
+            doRefresh();
         }
     }
 
@@ -109,13 +113,14 @@ public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     private Observable<List<DailyNews>> getNewsListObservable() {
         if (shouldSubScribeToZhihu()) {
-//            return NewsListFromZhihuObservable.ofDate(date);
+            return NewsListFromZhihuObservable.ofDate(date);
         } else {
-//            return NewsListFromAccelerateServerObservable.ofDate(date);
+            //           return NewsListFromAccelerateServerObservable.ofDate(date);
         }
         return null;
     }
 
+    @DebugLog
     private boolean shouldSubScribeToZhihu() {
         return isToday || !shouldUseAccerlerateServer();
     }
@@ -137,16 +142,24 @@ public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnR
     @Override
     public void onCompleted() {
         isRefreshed = true;
+
+        mSwipeRefreshLayout.setRefreshing(false);
+        mAdapter.updateNewsList(newsList);
+
+        new SaveNewsListTask(newsList).execute();
     }
 
     @Override
     public void onError(Throwable e) {
-
+        mSwipeRefreshLayout.setRefreshing(false);
+        if (isAdded()) {
+            ((BaseActivity) getActivity()).showSnackbar(R.string.network_error);
+        }
     }
 
     @Override
-    public void onNext(Object o) {
-
+    public void onNext(List<DailyNews> newsList) {
+        this.newsList = newsList;
     }
 
     @Override

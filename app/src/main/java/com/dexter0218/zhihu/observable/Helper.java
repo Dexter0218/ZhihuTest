@@ -1,5 +1,6 @@
 package com.dexter0218.zhihu.observable;
 
+import com.annimon.stream.Optional;
 import com.dexter0218.zhihu.support.lib.Http;
 
 import java.io.IOException;
@@ -71,4 +72,9 @@ public class Helper {
             }
         });
     }
+
+    static <T> Observable<T> toNonempty(Observable<Optional<T>> optionalObservable) {
+        return optionalObservable.filter(Optional::isPresent).map(Optional::get);
+    }
+
 }

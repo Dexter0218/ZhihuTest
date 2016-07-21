@@ -67,8 +67,13 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.CardViewHolder
         });
 
     }
-
-
+    public void setNewsList(List<DailyNews> newsList) {
+        this.newsList = newsList;
+    }
+    public void updateNewsList(List<DailyNews> newsList) {
+        setNewsList(newsList);
+        notifyDataSetChanged();
+    }
     @Override
     public void onBindViewHolder(CardViewHolder holder, int position) {
         DailyNews dailyNews = newsList.get(position);

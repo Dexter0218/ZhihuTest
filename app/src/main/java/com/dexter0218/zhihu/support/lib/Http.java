@@ -10,13 +10,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Created by Dexter0218 on 2016/7/21.
  */
 public class Http {
+    private static final String TAG ="ZHIHU_HTTP";
     public static final String CHARSET = "UTF-8";
 
+    @DebugLog
     public static String get(String address) throws IOException {
+        Log.i(TAG, "get: address"+address);
         URL url = new URL(address);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
@@ -30,8 +35,10 @@ public class Http {
                     response.append(inputLine);
                 }
                 in.close();
+                Log.i(TAG, "get: response"+response.toString());
                 return response.toString();
             } else {
+                Log.e(TAG, "Network Error - response code:" + con.getResponseCode());
                 throw new IOException("Network Error - response code:" + con.getResponseCode());
             }
         } finally {

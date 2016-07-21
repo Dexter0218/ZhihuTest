@@ -1,9 +1,13 @@
 package com.dexter0218.zhihu.observable;
 
+import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.annimon.stream.Optional;
+import com.annimon.stream.Stream;
 import com.dexter0218.zhihu.bean.DailyNews;
+import com.dexter0218.zhihu.bean.Question;
 import com.dexter0218.zhihu.bean.Story;
 import com.dexter0218.zhihu.support.Constants;
 
@@ -12,12 +16,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
 
 import rx.Observable;
 
 import static com.dexter0218.zhihu.observable.Helper.getHtml;
+import static com.dexter0218.zhihu.observable.Helper.toNonempty;
 
 /**
  * Created by Dexter0218 on 2016/7/21.
@@ -27,6 +36,7 @@ public class NewsListFromZhihuObservable {
     private static final String QUESTION_SELECTOR = "div.question";
     private static final String QUESTION_TITLES_SELECTOR = "h2.question-title";
     private static final String QUESTION_LINKS_SELECTOR = "div.view-more a";
+    private static final String TAG = "NFromZhihuObservable";
 
     public static Observable<List<DailyNews>> ofDate(String date) {
         Observable<Story> stories = getHtml(Constants.Urls.ZHIHU_DAILY_BEFORE, date)
@@ -36,7 +46,10 @@ public class NewsListFromZhihuObservable {
         Observable<Document> documents = stories.flatMap(NewsListFromZhihuObservable::getDocumentObservable);
 
         Observable<Optional<Pair<Story, Document>>> optionalStoryNDocuments = Observable.zip(stories, documents, NewsListFromZhihuObservable::createPair);
-        return null;
+        Observable<Pair<Story, Document>> storyNDocuments = toNonempty(optionalStoryNDocuments);
+        return toNonempty(storyNDocuments.map(NewsListFromZhihuObservable::convertToDailyNews))
+                .doOnNext(news -> news.setDate(date))
+                .toList();
     }
 
     private static Optional<Pair<Story, Document>> createPair(Story story, Document document) {
@@ -72,12 +85,14 @@ public class NewsListFromZhihuObservable {
     }
 
     private static Observable<Story> getStoriesObservable(JSONArray newsArray) {
+        Log.d(TAG, "getStoriesObservable: newsArray:" + newsArray);
         return Observable.create(subscriber -> {
             try {
                 for (int i = 0; i < newsArray.length(); i++) {
                     JSONObject newsJson = newsArray.getJSONObject(i);
                     subscriber.onNext(getStoryFromJSON(newsJson));
                 }
+                subscriber.onCompleted();
             } catch (JSONException e) {
                 subscriber.onError(e);
             }
@@ -94,9 +109,66 @@ public class NewsListFromZhihuObservable {
 
     private static String getThumbnailUrlForStory(JSONObject jsonStory) throws JSONException {
         if (jsonStory.has("images")) {
-            return (String) jsonStory.getJSONArray("image").get(0);
+            return (String) jsonStory.getJSONArray("images").get(0);
         } else {
             return null;
         }
+    }
+
+    private static Optional<DailyNews> convertToDailyNews(Pair<Story, Document> pair) {
+        DailyNews result = null;
+        Story story = pair.first;
+        Document document = pair.second;
+        String dailyTitle = story.getDailyTitle();
+
+        List<Question> questions = getQuestions(document, dailyTitle);
+        if (Stream.of(questions).allMatch(Question::isValidZhihuQuestion)) {
+            result = new DailyNews();
+
+            result.setDailyTitle(dailyTitle);
+            result.setThumbnailUrl(story.getThumbnailUrl());
+            result.setQuestions(questions);
+        }
+        return Optional.ofNullable(result);
+    }
+
+    private static List<Question> getQuestions(Document document, String dailyTitle) {
+        List<Question> result = new ArrayList<>();
+        Elements questionElements = getQuestionElements(document);
+        for (Element questionElement : questionElements) {
+            Question question = new Question();
+            String questionTitle = getQuestionTitleFromQuestionElement(questionElement);
+            String questionUrl = getQuestionUrlFromQuestionElement(questionElement);
+            questionTitle = TextUtils.isEmpty(questionTitle) ? dailyTitle : questionTitle;
+
+            question.setTitle(questionTitle);
+            question.setUrl(questionUrl);
+            result.add(question);
+        }
+        return result;
+    }
+
+    private static String getQuestionTitleFromQuestionElement(Element questionElement) {
+        Element questionTitleElement = questionElement.select(QUESTION_TITLES_SELECTOR).first();
+
+        if (questionTitleElement == null) {
+            return null;
+        } else {
+            return questionTitleElement.text();
+        }
+    }
+
+    private static String getQuestionUrlFromQuestionElement(Element questionElement) {
+        Element viewMoreElement = questionElement.select(QUESTION_LINKS_SELECTOR).first();
+
+        if (viewMoreElement == null) {
+            return null;
+        } else {
+            return viewMoreElement.attr("href");
+        }
+    }
+
+    private static Elements getQuestionElements(Document document) {
+        return document.select(QUESTION_SELECTOR);
     }
 }
