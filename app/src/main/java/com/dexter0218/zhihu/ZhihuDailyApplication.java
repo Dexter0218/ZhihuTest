@@ -10,6 +10,7 @@ import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.tencent.bugly.crashreport.CrashReport;
 
 /**
  * Created by Dexter0218 on 2016/7/20.
@@ -43,6 +44,8 @@ public final class ZhihuDailyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        CrashReport.initCrashReport(getApplicationContext(), "900041992", false);
+
         applicationContext = this;
         initImageLoader(getApplicationContext());
         dataSource = new DailyNewsDataSource(getApplicationContext());
