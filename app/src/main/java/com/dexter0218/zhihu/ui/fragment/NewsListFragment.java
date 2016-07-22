@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dexter0218.zhihu.R;
 import com.dexter0218.zhihu.ZhihuDailyApplication;
 import com.dexter0218.zhihu.adapter.NewsAdapter;
 import com.dexter0218.zhihu.observable.NewsListFromDatabaseObservable;
@@ -17,7 +18,6 @@ import com.dexter0218.zhihu.observable.NewsListFromZhihuObservable;
 import com.dexter0218.zhihu.support.Constants;
 import com.dexter0218.zhihu.task.SaveNewsListTask;
 import com.dexter0218.zhihu.ui.activity.BaseActivity;
-import com.dexter0218.zhihu.ui.activity.R;
 import com.dexter0218.zhihu.bean.DailyNews;
 
 import java.util.ArrayList;

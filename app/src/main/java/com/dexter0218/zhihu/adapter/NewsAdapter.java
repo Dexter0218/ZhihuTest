@@ -12,8 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.annimon.stream.Stream;
+import com.dexter0218.zhihu.R;
 import com.dexter0218.zhihu.support.Constants;
-import com.dexter0218.zhihu.ui.activity.R;
 import com.dexter0218.zhihu.bean.DailyNews;
 import com.dexter0218.zhihu.bean.Question;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;

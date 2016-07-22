@@ -5,6 +5,7 @@ import com.dexter0218.zhihu.support.lib.Http;
 
 import java.io.IOException;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -16,6 +17,7 @@ public class Helper {
 
     }
 
+    @DebugLog
     static Observable<String> getHtml(String url) {
         return Observable.create(new Observable.OnSubscribe<String>() {
 

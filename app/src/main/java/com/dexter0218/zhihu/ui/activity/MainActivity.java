@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.support.design.widget.TabLayout;
 
+import com.dexter0218.zhihu.R;
 import com.dexter0218.zhihu.support.Constants;
 import com.dexter0218.zhihu.ui.fragment.NewsListFragment;
 

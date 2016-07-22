@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
 
+import com.dexter0218.zhihu.BuildConfig;
+import com.dexter0218.zhihu.R;
+
 import hugo.weaving.DebugLog;
 
 public class BaseActivity extends AppCompatActivity {
