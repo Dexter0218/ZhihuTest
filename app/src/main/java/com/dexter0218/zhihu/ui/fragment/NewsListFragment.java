@@ -164,6 +164,6 @@ public class NewsListFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onRefresh() {
-
+            doRefresh();
     }
 }
